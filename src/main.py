@@ -39,5 +39,5 @@ def main(files):
 
 if __name__ == '__main__':
     import logging
-    logging.basicConfig(level=logging.ERROR)
+    logging.basicConfig(level=logging.INFO)
     main(sys.argv[1:])

@@ -73,7 +73,7 @@ class TimeSlot(object):
 class Parser(object):
     @staticmethod
     def parse(filename):
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename, 'r', encoding='utf-8-sig') as f:
             parser = Parser(csv.reader(f))
         return parser.do_parse()
 
@@ -103,17 +103,15 @@ class Parser(object):
         while self.has_rows():
             num_weeks += 1
             row = self._pop_next_row()
-            year_col = row[0].split()[0]
-            week_col = row[0].split()[-1]
 
-            date_string = '%s %s' % (
-                int(year_col[year_col.index('1')
-                    :year_col.index('陽')].strip()) + 1911,
-                week_col[:week_col.index('賽')]
-            )
-            date = datetime.datetime.strptime(date_string, '%Y %m月%d日')
+            year, _, date = row[0].split()
+            year = int(year[:3]) + 1911
 
-            week = Week(num_weeks, week_col)
+            date = date[:date.index('賽')].strip()
+            date = datetime.datetime.strptime(date, '%m月%d日')
+            date = datetime.date(year, date.month, date.day)
+
+            week = Week(num_weeks, date)
             logger.info(week)
 
             row = self._pop_next_row()
@@ -140,8 +138,9 @@ class Parser(object):
 
             for slot in timeslots:
                 (index, start_time), teams = slot[0], slot[1:]
-                start_time = datetime.datetime.strptime(date.strftime(
-                    '%m/%d/%Y ') + start_time, '%m/%d/%Y %H:%M')
+                start_time = datetime.datetime.strptime(start_time, '%H:%M')
+                start_time = datetime.datetime(
+                    date.year, date.month, date.day, start_time.hour, start_time.minute)
 
                 for i, team_pair in enumerate(teams):
                     team1, team2 = map(lambda name: self.league.get_team(
@@ -152,8 +151,6 @@ class Parser(object):
                     team1.add_slot(slot)
                     team2.add_slot(slot)
                     week.add_slot(slot)
-                    # logger.info(
-                    #     (index, start_time, fields[i], team1.name, team2.name))
 
             yield week
 
