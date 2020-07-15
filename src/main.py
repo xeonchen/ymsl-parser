@@ -12,6 +12,11 @@ def main(files):
         print("Processing file: %s" % (file))
         league = Parser.parse(file)
 
+        for week in league.weeks:
+            print(week.name)
+            for slot in week.slots:
+                print(slot)
+
         for team in league.teams.values():
             with open('output/%s.csv' % (team.name), 'w', encoding='utf-8') as csvfile:
                 fieldnames = ['Subject', 'Start Date', 'End Date',
@@ -34,5 +39,5 @@ def main(files):
 
 if __name__ == '__main__':
     import logging
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.ERROR)
     main(sys.argv[1:])

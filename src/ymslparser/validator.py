@@ -17,7 +17,6 @@ def invalidate(rows):
 
 
 def invalidate_weeks(rows):
-    print('invalidate_weeks')
     num_weeks = 0
     while rows:
         num_weeks += 1

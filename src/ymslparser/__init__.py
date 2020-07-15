@@ -16,6 +16,9 @@ class League(object):
         self.teams = {}
         self.weeks = []
 
+    def __del__(self):
+        self.teams.clear()
+
     def add_team(self, team):
         self.teams[team.name] = team
 
@@ -33,6 +36,9 @@ class Team(object):
 
     def __str__(self):
         return 'Team %s: %s' % (self.name, [str(slot) for slot in self.slots])
+
+    def clear(self):
+        self.slots.clear()
 
     def add_slot(self, time_slot):
         self.slots.append(time_slot)
@@ -101,7 +107,8 @@ class Parser(object):
             week_col = row[0].split()[-1]
 
             date_string = '%s %s' % (
-                int(year_col[year_col.index('1'):year_col.index('陽')].strip()) + 1911,
+                int(year_col[year_col.index('1')
+                    :year_col.index('陽')].strip()) + 1911,
                 week_col[:week_col.index('賽')]
             )
             date = datetime.datetime.strptime(date_string, '%Y %m月%d日')
