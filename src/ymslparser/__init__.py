@@ -13,6 +13,7 @@ logger = logging.getLogger('ymsl')
 
 class League(object):
     def __init__(self):
+        self.name = 'YMSL'
         self.teams = {}
         self.weeks = []
 
@@ -75,7 +76,7 @@ class Parser(object):
     def parse(filename):
         with open(filename, 'r', encoding='utf-8-sig') as f:
             parser = Parser(csv.reader(f))
-        return parser.do_parse()
+            return parser.do_parse()
 
     def __init__(self, content):
         self._rows = [row for row in content]
@@ -104,8 +105,10 @@ class Parser(object):
             num_weeks += 1
             row = self._pop_next_row()
 
-            year, _, date = row[0].split()
+            year, tournament, date = row[0].split()
             year = int(year[:3]) + 1911
+            tournament = '%s_%s' % (year, tournament)
+            self.league.tournament = tournament
 
             date = date[:date.index('賽')].strip()
             date = datetime.datetime.strptime(date, '%m月%d日')

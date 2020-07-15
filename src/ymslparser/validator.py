@@ -19,6 +19,7 @@ def invalidate(rows):
 
 def invalidate_weeks(rows):
     num_weeks = 0
+    tournament = None
     while rows:
         num_weeks += 1
         logger.debug('check week #%d' % (num_weeks))
@@ -35,6 +36,9 @@ def invalidate_weeks(rows):
 
         tournament_name = title[1].strip()
         assert tournament_name, "this column should be the tournament name"
+        assert tournament is None or tournament == tournament_name, '%s %s' % (
+            tournament, tournament_name)
+        tournament = tournament_name
 
         week = title[2]
         week = week[:week.index('賽')].strip()
