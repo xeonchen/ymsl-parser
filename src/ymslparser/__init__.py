@@ -4,6 +4,7 @@ import csv
 import datetime
 import logging
 import operator
+import re
 from .utils import *
 from .validator import invalidate
 
@@ -46,13 +47,13 @@ class Team(object):
 
 
 class Week(object):
-    def __init__(self, idx, name):
-        self.idx = idx
+    def __init__(self, name, date):
         self.name = name
+        self.date = date
         self.slots = []
 
     def __str__(self):
-        return 'Week: %s' % (self.name)
+        return 'Week %s: %s' % (self.name, self.date)
 
     def add_slot(self, time_slot):
         self.slots.append(time_slot)
@@ -73,8 +74,8 @@ class TimeSlot(object):
 
 class Parser(object):
     @staticmethod
-    def parse(filename):
-        with open(filename, 'r', encoding='utf-8-sig') as f:
+    def parse(filename, **kw):
+        with open(filename, 'r', **kw) as f:
             parser = Parser(csv.reader(f))
             return parser.do_parse()
 
@@ -101,20 +102,22 @@ class Parser(object):
 
     def _parse_weeks(self):
         num_weeks = 0
+        date_pattern = re.compile('\d+')
+        week_pattern = re.compile('第[一二三四五六七八九十]+週')
         while self.has_rows():
             num_weeks += 1
             row = self._pop_next_row()
 
-            year, tournament, date = row[0].split()
-            year = int(year[:3]) + 1911
-            tournament = '%s_%s' % (year, tournament)
+            name, tournament, date = row[0].split()
+            year_str = date_pattern.search(name)[0]
+            year = int(year_str) + 1911
+            self.league.name = name[len(year_str):]
+            self.league.year = year
             self.league.tournament = tournament
 
-            date = date[:date.index('賽')].strip()
-            date = datetime.datetime.strptime(date, '%m月%d日')
-            date = datetime.date(year, date.month, date.day)
-
-            week = Week(num_weeks, date)
+            month, day = map(int, date_pattern.findall(date))
+            week = Week(week_pattern.search(date)[
+                        0], datetime.date(year, month, day))
             logger.info(week)
 
             row = self._pop_next_row()
@@ -143,7 +146,7 @@ class Parser(object):
                 (index, start_time), teams = slot[0], slot[1:]
                 start_time = datetime.datetime.strptime(start_time, '%H:%M')
                 start_time = datetime.datetime(
-                    date.year, date.month, date.day, start_time.hour, start_time.minute)
+                    year, month, day, start_time.hour, start_time.minute)
 
                 for i, team_pair in enumerate(teams):
                     team1, team2 = map(lambda name: self.league.get_team(

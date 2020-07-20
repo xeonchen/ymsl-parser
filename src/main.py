@@ -10,17 +10,23 @@ from ymslparser import Parser
 def main(files):
     for file in files:
         print("Processing file: %s" % (file))
-        league = Parser.parse(file)
+        league = Parser.parse(file, encoding='utf-8-sig')
 
         for week in league.weeks:
-            print(week.name)
+            print(week.date, week.name)
             for slot in week.slots:
                 print(slot)
 
         for team in league.teams.values():
-            with open('output/%s_%s.csv' % (league.tournament, team.name), 'w', encoding='utf-8') as csvfile:
-                fieldnames = ['Subject', 'Start Date', 'End Date',
-                              'Start Time', 'End Time', 'Location']
+            with open('output/%s_%s_%s.csv' % (league.year, league.tournament, team.name), 'w', encoding='utf-8') as csvfile:
+                fieldnames = [
+                    'Subject',
+                    'Start Date',
+                    'End Date',
+                    'Start Time',
+                    'End Time',
+                    'Location',
+                ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
 
