@@ -18,13 +18,14 @@ def main(files):
                 print(slot)
 
         for team in league.teams.values():
-            with open('output/%s_%s_%s.csv' % (league.year, league.tournament, team.name), 'w', encoding='utf-8') as csvfile:
+            with open('output/%s_%s_%s_%s.csv' % (league.year, league.name, league.tournament, team.name), 'w', encoding='utf-8') as csvfile:
                 fieldnames = [
                     'Subject',
                     'Start Date',
                     'End Date',
                     'Start Time',
                     'End Time',
+                    'Description',
                     'Location',
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -39,6 +40,7 @@ def main(files):
                         'End Date': e.strftime('%m/%d/%Y'),
                         'Start Time': s.strftime('%I:%M %p'),
                         'End Time': e.strftime('%I:%M %p'),
+                        'Description': '%d %s %s' % (league.year, league.name, league.tournament),
                         'Location': slot.field
                     })
 
