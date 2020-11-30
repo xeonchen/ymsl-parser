@@ -110,12 +110,13 @@ class Parser(object):
 
             name, tournament, date = row[0].split()
             year_str = date_pattern.search(name)[0]
-            year = int(year_str) + 1911
+            month, day = map(int, date_pattern.findall(date))
+            is_last_year = '春季熱身賽' == tournament and month > 10
+            year = int(year_str) + (1910 if is_last_year else 1911)
             self.league.name = name[len(year_str):]
             self.league.year = year
             self.league.tournament = tournament
 
-            month, day = map(int, date_pattern.findall(date))
             week = Week(week_pattern.search(date)[
                         0], datetime.date(year, month, day))
             logger.info(week)
